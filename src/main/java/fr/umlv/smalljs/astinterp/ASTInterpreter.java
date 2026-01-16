@@ -19,11 +19,13 @@ import fr.umlv.smalljs.rt.JSObject;
 
 import java.io.PrintStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static fr.umlv.smalljs.rt.JSObject.UNDEFINED;
+import static fr.umlv.smalljs.rt.JSObject.newObject;
 import static java.util.stream.Collectors.joining;
 
 public final class ASTInterpreter {
@@ -154,16 +156,40 @@ public final class ASTInterpreter {
           yield UNDEFINED;
       }
       case ObjectLiteral(Map<String, Expr> initMap, int lineNumber) -> {
-				throw new UnsupportedOperationException("TODO ObjectLiteral");
+				var result = newObject(null);
+        for(var expr: initMap.entrySet()) {
+          result.register(expr.getKey(), visit(expr.getValue(), env));
+        }
+        yield result;
       }
       case FieldAccess(Expr receiver, String name, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO FieldAccess");
+        var object = visit(receiver, env);
+        if (object instanceof JSObject jsObject) {
+          yield jsObject.lookupOrDefault(name, JSObject.UNDEFINED);
+        }
+        throw new Failure("receiver of '." + name + "' must be an object, at line " + lineNumber);
       }
       case FieldAssignment(Expr receiver, String name, Expr expr, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO FieldAssignment");
+        var object = visit(receiver, env);
+        if (object instanceof JSObject jsObject) {
+          jsObject.register(name, expr);
+          yield UNDEFINED;
+        }
+        throw new Failure("receiver of '." + name + "' must be an object, at line " + lineNumber);
       }
       case MethodCall(Expr receiver, String name, List<Expr> args, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO MethodCall");
+        var object = visit(receiver, env);
+        if (object instanceof JSObject jsObject) {
+          var method = jsObject.lookupOrDefault(name, JSObject.UNDEFINED);
+          if (method instanceof JSObject methodObj) {
+            var arguments = args.stream()
+                .map(arg -> visit(arg, env))
+                .toArray();
+            yield methodObj.invoke(jsObject, arguments);
+          }
+          throw new Failure("Property '" + name + "' is not a function at line " + lineNumber);
+        }
+        throw new Failure("receiver of '." + name + "' must be an object, at line " + lineNumber);
       }
     };
   }
