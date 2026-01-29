@@ -218,15 +218,16 @@ public final class StackInterpreter {
 
           // save bp/pc/code in activation zone
 //                     stack[activation + offset] = ??
-          var activation = bp + code.slotCount();;
+            var newBp = baseArg - 1;
+          var activation = newBp + code.slotCount();;
           stack[activation + BP_OFFSET] = bp;
           stack[activation + PC_OFFSET] = pc;
           stack[activation + FUN_OFFSET] = encodeAnyValue(function, dict);
 
           // initialize pc, bp and sp
           pc = 0;
-          bp = baseArg - FUNCALL_PREFIX;
-          sp = bp + code.slotCount() + ACTIVATION_SIZE;
+          bp = newBp;
+          sp = activation + ACTIVATION_SIZE;
 
           // initialize all locals that are not parameters
           for (var i = bp + code.parameterCount(); i < bp + code.slotCount(); i++) {
@@ -257,7 +258,7 @@ public final class StackInterpreter {
             return decodeAnyValue(result, dict, heap);
           }
           // restore sp, function and bp
-          sp = bp;
+          sp = bp - 1;
           function = (JSObject) decodeAnyValue(stack[activation + FUN_OFFSET], dict, heap);
           bp = stack[activation + BP_OFFSET];
 
