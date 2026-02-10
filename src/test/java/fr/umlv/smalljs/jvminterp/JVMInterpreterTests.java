@@ -20,7 +20,7 @@ public class JVMInterpreterTests {
     return outStream.toString(UTF_8).replace("\r\n", "\n");
   }
 
-  /*
+
   @Nested
   public class Q2 {
     @Test
@@ -302,7 +302,7 @@ public class JVMInterpreterTests {
               """));
     }
   }
-
+/*
   @Nested
   public class Q12 {
     @Test
