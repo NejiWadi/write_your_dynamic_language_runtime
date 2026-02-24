@@ -318,50 +318,48 @@ public final class StackInterpreter {
         }
         case Instructions.GET -> {
           // get field name from the instructions
-//          var fieldName = (String) instrs[pc++];
-//
+          var fieldName = decodeDictObject(instrs[pc++], dict);
 //          // get reference from the top of the stack
-//          int value = encodeDictObject(fieldName, dict);
-//          int ref = pop(stack, sp--);
+          int value = pop(stack, --sp);
+          int ref = decodeReference(value);
 //          // get class on heap from the reference
-//          int vClass = heap[ref];
+          int vClass = heap[ref];
 //          // get JSObject from class
-//          var clazz = (JSObject) decodeDictObject(vClass, dict);
+          var clazz = (JSObject) decodeDictObject(vClass, dict);
 //          // get field slot from JSObject
-//          var slot = clazz.fastAccess(value);
-//          if (slot == null) {
+          var slot = clazz.lookupOrDefault((String) fieldName, null);
+          if (slot == null) {
 ////           no slot, push undefined
-//          	push(stack, sp++, undefined);
-//          	continue;
-//          }
+          	push(stack, sp++, undefined);
+          	continue;
+          }
 //          // get the field index
-//          int fieldIndex = clazz.
+          int fieldIndex = (Integer) slot;
 //          // get field value
-//          int fieldValue = ...
+          int fieldValue = heap[ref + OBJECT_HEADER_SIZE + fieldIndex];
 //          // push field value on top of the stack
-//          push(stack, sp++, fieldValue);
+          push(stack, sp++, fieldValue);
         }
         case Instructions.PUT -> {
-          throw new UnsupportedOperationException("TODO PUT");
           // get field name from the instructions
-          // var fieldName = (String) ...
+           var fieldName = (String) decodeDictObject(instrs[pc++], dict);
           // get new value from the top of the stack
-          //var value = ...
+          var value = decodeAnyValue(pop(stack, --sp), dict, heap);
           // get reference from the top of the stack
-          // var ref = decodeReference(...);
+           var ref = decodeReference(pop(stack, --sp));
           // get class on heap from the reference
-          //var vClass = heap[ref];
+          var vClass = heap[ref];
           // get JSObject from class
-          //var clazz = (JSObject) decodeDictObject(vClass, dict);
+          var clazz = (JSObject) decodeDictObject(vClass, dict);
           // get field slot from JSObject
-          //var slot = ...
-          //if (slot == null) {
-          //	throw new Failure("invalid field " + fieldName);
-          //}
+          var slot = clazz.lookupOrDefault(fieldName, null);
+          if (slot == null) {
+          	throw new Failure("invalid field " + fieldName);
+          }
           // get the field index
-          //var fieldIndex = ...
+          var fieldIndex = (int) slot;
           // store field value from the top of the stack on heap
-          //heap[...] = ...;
+          heap[hp + OBJECT_HEADER_SIZE + fieldIndex] = encodeDictObject(value, dict);
         }
         case Instructions.PRINT -> {
           // pop the value on top of the stack

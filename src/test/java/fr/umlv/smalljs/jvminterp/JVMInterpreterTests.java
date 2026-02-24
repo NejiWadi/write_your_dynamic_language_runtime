@@ -302,7 +302,7 @@ public class JVMInterpreterTests {
               """));
     }
   }
-/*
+
   @Nested
   public class Q12 {
     @Test
@@ -545,5 +545,4 @@ public class JVMInterpreterTests {
                   """));
     }
   }
-  */
 }

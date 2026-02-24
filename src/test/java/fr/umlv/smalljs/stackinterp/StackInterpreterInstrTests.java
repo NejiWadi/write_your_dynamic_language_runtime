@@ -1168,7 +1168,7 @@ public class StackInterpreterInstrTests {
 					execute(new Code(instrs, 1, 2), dict));
 		}
 	}
-/*
+
 	@Nested
 	public class Q16 {
 		@Test
@@ -1243,7 +1243,7 @@ public class StackInterpreterInstrTests {
 					execute(new Code(instrs, 1, 2), dict));
 		}
 	}
-
+/*
 	@Nested
 	public class Q17 {
 		@Test
